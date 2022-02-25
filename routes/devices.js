@@ -1,26 +1,12 @@
-const appRouter = (app, database) => {
+const express = require('express');
+const router = express.Router();
 
-    /**
-     * Verify input airplane_id with the airplanes collection 
-     */
-     async function verifyAirplaneId(airplaneId) {
-        // Fetch the airplanes collection
-        const airplanesCollection = database.collection("airplanes");
-        const cursor = await airplanesCollection.find({}, {}); 
-        const results = await cursor.toArray();
-        let idExist = false;
-        results.forEach(function(airplane){
-            if (airplane.id === airplaneId) {
-                idExist = true;
-            }
-        });
-        return idExist;
-    }
+module.exports = function(database) {
 
     /**
      * Returns an array of all non-deleted devices.
      */
-    app.get('/devices', async function (req, res) {
+    router.get('/', async function (req, res) {
         // Fetch the devices collection
         const collection = database.collection("devices");
         // Get all devices
@@ -42,7 +28,7 @@ const appRouter = (app, database) => {
     /**
      * Creates a new device
      */
-    app.post('/devices', async function (req, res, next) {
+    router.post('/', async function (req, res, next) {
         const requestParams = req.body;
         const mySet = new Set(['id','airplane_id','serial_number','description']);
         // Check if missing attributes and values
@@ -104,14 +90,16 @@ const appRouter = (app, database) => {
     /**
      * Returns a device that matches the id in the path.
      */
-    app.get('/devices/:id', async function(req, res) {
+    router.get('/:id', async function(req, res) {
         const inputId = req.params.id;
+        const responseDevice = {};
         // Fetch the devices collection
         const collection = database.collection("devices");
         // Check for existing id and serial number
         const result = await collection.findOne({ id: inputId});
-        const responseDevice = {};
-        if (result.deleted) {
+        if (result === null) {
+            res.status(404).send(`Device not exist`);
+        } else if (result.deleted) {
             res.status(404).send(`Device has been deleted`);
         } else {
             responseDevice.id = result.id;
@@ -125,7 +113,7 @@ const appRouter = (app, database) => {
     /**
      * Update a single device.
      */
-    app.patch('/devices/:id', async function (req, res, next) {
+    router.patch('/:id', async function (req, res, next) {
         const inputId = req.params.id;
         const { airplane_id, serial_number, description } = req.body;
         const collection = database.collection("devices");
@@ -166,7 +154,7 @@ const appRouter = (app, database) => {
     /**
      * Marks a single device as deleted.
      */
-    app.delete('/devices/:id', async function (req, res) {
+    router.delete('/:id', async function (req, res) {
         const inputId = req.params.id;
         const collection = database.collection("devices");
         const findResult = await collection.findOne({ id: inputId});
@@ -183,6 +171,6 @@ const appRouter = (app, database) => {
         }
     });
 
-};
+    return router;
+}
 
-module.exports = appRouter;

@@ -12,11 +12,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect to the MongoDB client
 mongoClient.connect();
-// Connect to cluster DB
+// Connect to the cluster DB
 const database = mongoClient.db("deviceManagerService");
+const router = require('./routes/devices')(database);
 
 // Routes files
-require('./routes/routes.js')(app, database);
+app.use('/devices',router);
 
 // Handle invalid routes
 app.get("*", (req, res) => {
