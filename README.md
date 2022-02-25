@@ -4,7 +4,8 @@ NodeJS REST-API app to manage IOT devices on airplanes.
 ## Instructions
 In order to run the app, run the following commands:
 1. "npm install" to install NodeJS packages and modules.
-2. "npm run start" to run nodejs server on port 3000.
+2. Paste the attached .env file for MongoDB connection.
+3. "npm run start" to run nodejs server on port 3000.
 
 ## Routes URL
 - Returns an array of all non-deleted devices: (GET) http://localhost:3000/devices
